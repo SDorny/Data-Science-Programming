@@ -47,7 +47,7 @@ _In VS Code, write a python script to create the example Altair chart from secti
 ```{python}
 #| label: Q1 chart
 #| code-summary: plot example
-#| fig-cap: "My useless chart"
+#| fig-cap: "Bigger Cars Get Less MPG"
 #| fig-align: center
 # Include and execute your code here
 
