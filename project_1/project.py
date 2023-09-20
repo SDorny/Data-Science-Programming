@@ -2,6 +2,7 @@
 # load packages
 import pandas as pd
 import altair as alt
+import numpy as np
 
 #%%
 # load data
@@ -10,16 +11,20 @@ names = pd.read_csv(url)
 
 # %%
 names
-# %%
-names['name'].value_counts()
+
+ # %%
+olivers_in_UT = (names
+                 .filter(['name', 'UT', 'year'])
+                 .query('name.str.startswith("Oliver") and UT > 0'))
+count = olivers_in_UT['UT'].sum()
+
+count
+
 
 # %%
-names.year.min()
-names.year.max()
-
-# %%
-names.columns
-# %%
-names.shape
-names.head()
-names.describe()
+(names
+ .filter(['name', 'year'])
+ .sort_values('year')
+ .query('name.str.startswith("Felisha")')
+ .head(1)
+ )
