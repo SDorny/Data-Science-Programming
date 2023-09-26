@@ -36,9 +36,9 @@ chart = alt.Chart(sarah_over_time).mark_area(
         y2=0
     )
 ).encode(
-    alt.X('year'),
+    alt.X('year', axis= alt.Axis(format = 'd')),
     alt.Y('Total')
-)
+).properties(title= "Name of Sarah Overtime")
 
 
 chart
@@ -64,12 +64,13 @@ chart = alt.Chart(brit_over_time).mark_area(
         y2=0
     )
 ).encode(
-    alt.X('year'),
+    alt.X('year', axis= alt.Axis(format = 'd')),
     alt.Y('Total')
 )
 
 chart
 
+# LIMIT THE X-AXIS TO THE SPECIFIED YEARS
 # %%
 filterd_names = (names
                  .filter(['name', 'year', 'Total'])
@@ -80,9 +81,9 @@ filterd_names
 
 # %%
 chart = alt.Chart(filterd_names).mark_line().encode(
-    x='year',
+    x=alt.X('year', axis= alt.Axis(format = 'd')),
     y='Total',
-    color='name',
+    color=alt.Color('name').title("Names"),
 )
 chart
 
@@ -96,9 +97,9 @@ count = leia_over_time['Total'].sum()
 leia_over_time
 # %%
 chart = alt.Chart(leia_over_time).mark_line().encode(
-    x='year',
+    x=alt.X('year', axis= alt.Axis(format = 'd')),
     y='Total',
-    color='name',
+    color=alt.Color('name').title("Name"),
 )
 chart
 # %%
