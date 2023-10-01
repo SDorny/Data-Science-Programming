@@ -13,15 +13,6 @@ names = pd.read_csv(url)
 # %%
 names
 
- # %%
-sarah_over_time = (names
-                 .filter(['name', 'year', 'Total'])
-                 .query('name == "Sarah"'))
-count = sarah_over_time['Total'].sum()
-
-sarah_over_time
-
-
 
 # %%
 filterd_names = (names
@@ -40,4 +31,21 @@ chart = alt.Chart(filterd_names).mark_line().encode(
 )
 
 chart
+# %%
+parent_names = (names
+                 .filter(['name', 'year', 'Total'])
+                 .query('name == "Janet" or name == "Jared"')
+                 )
+
+pchart = alt.Chart(parent_names).mark_line().encode(
+    x='year',
+    y='Total',
+    color='name',
+    )
+
+pchart
+# %%
+
+final = pchart + chart
+final
 # %%
