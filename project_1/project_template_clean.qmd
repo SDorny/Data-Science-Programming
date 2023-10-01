@@ -1,0 +1,427 @@
+---
+title: "Client Report - What's in a name?"
+subtitle: "Course DS 250"
+author: "Sarah Dorny"
+format:
+  html:
+    self-contained: true
+    page-layout: full
+    title-block-banner: true
+    toc: true
+    toc-depth: 3
+    toc-location: body
+    number-sections: false
+    html-math-method: katex
+    code-fold: true
+    code-summary: "Show the code"
+    code-overflow: wrap
+    code-copy: hover
+    code-tools:
+        source: false
+        toggle: true
+        caption: See code
+    
+---
+
+```{python}
+#| label: libraries
+#| include: false
+# load packages
+import pandas as pd
+import altair as alt
+import numpy as np
+alt.data_transformers.enable("vegafusion")
+
+from IPython.display import Markdown
+from IPython.display import display
+from tabulate import tabulate
+```
+
+
+## Elevator pitch
+
+_An individual is given a name at birth that they use for the rest of their life. While some may prefer to go by a nickname or potentially even change it, the majority keep the name given to them by their parents. With the weight of that realization, how does one choose a name? What are they inspired by? How have certain names changed overtime? We dive into each of these questions below._
+
+```{python}
+#| label: project data
+#| code-summary: Read and format project data
+# Include and execute your code here
+url = "https://github.com/byuidatascience/data4names/raw/master/data-raw/names_year/names_year.csv"
+names = pd.read_csv(url)
+```
+
+
+## QUESTION|TASK 1
+
+__How does your name at your birth year compare to its use historically?__
+
+_In my birth year, 1999, we see a sharp decline in the usage of the name Sarah. Since the 1910's, the name was commonly used, around 5,000 babies from our data sample were given that name each year. There was a huge spike in the 70's-2000's._
+
+```{python}
+#| label: Q1
+sarah_over_time = (names
+                 .filter(['name', 'year', 'Total'])
+                 .query('name == "Sarah"'))
+
+```
+
+
+```{python}
+#| label: Q1 chart
+ref_data = pd.DataFrame({'year': [1999], 'Total': [sarah_over_time['Total'].max()], 'text': ['My Birth Year']})
+
+# Main chart
+chart = alt.Chart(sarah_over_time).mark_area(
+    line={'color':'darkgreen'},
+    color=alt.Gradient(
+        gradient='linear',
+        stops=[alt.GradientStop(color='white', offset=0),
+               alt.GradientStop(color='darkgreen', offset=1)],
+        x1=1,
+        x2=1,
+        y1=1,
+        y2=0
+    )
+).encode(
+    x=alt.X('year', axis= alt.Axis(format = 'd'), title='Year'),
+    y=alt.Y('Total', title='# of Births')
+).properties(title= "The Name 'Sarah' Spikes in Popularity")
+
+# Reference line and text annotation
+annotations = alt.Chart(ref_data).mark_rule(color='red').encode(x='year:Q') + \
+              alt.Chart(ref_data).mark_text(align='left', baseline='middle', dx=2).encode(
+                  x='year:Q',
+                  y='Total:Q',
+                  text='text'
+              )
+
+# Combine chart and annotations
+sarah_chart = chart + annotations
+
+sarah_chart
+
+```
+
+```{python}
+#| label: Q1 table
+#| tbl-cap-location: top
+sarah_over_time
+
+```
+
+
+## QUESTION|TASK 2
+
+__If you talked to someone named Brittany on the phone, what is your guess of his or her age? What ages would you not guess?__
+
+_In this chart, we see that the name Brittany was incredibly famous for about 20 years, reaching a peak of 33,000 in 1990. But just as rapidly as the name rose, it quickly decreased. According to the data given, most Brittany's will be in their 30's-40's. You would be hard pressed to find anyone older or younger than that with the name._
+
+```{python}
+#| label: Q2
+brit_over_time = (names
+                 .filter(['name', 'year', 'Total'])
+                 .query('name == "Brittany"'))
+```
+
+```{python}
+#| label: Q2 chart
+#| fig-align: center
+chart = alt.Chart(brit_over_time).mark_area(
+    line={'color':'blue'},
+    color=alt.Gradient(
+        gradient='linear',
+        stops=[alt.GradientStop(color='white', offset=0),
+               alt.GradientStop(color='blue', offset=1)],
+        x1=1,
+        x2=1,
+        y1=1,
+        y2=0
+    )
+).encode(
+    x=alt.X('year', axis= alt.Axis(format = 'd'), title='Year'),
+    y=alt.Y('Total', title='# of Births')
+).properties(title= "'Brittany', a Name Belonging to the 80's and 90's Kids")
+
+# Data for reference lines (without text annotations)
+ref_data = pd.DataFrame({'year': [1980, 2000]})
+
+# Reference lines
+reference_lines = alt.Chart(ref_data).mark_rule(color='orange').encode(x='year:Q')
+
+# Combine chart and reference lines
+brit_chart = chart + reference_lines
+
+brit_chart
+```
+
+
+```{python}
+#| label: Q2 table
+brit_over_time
+```
+
+
+## QUESTION|TASK 3
+
+__Mary, Martha, Peter, and Paul are all Christian names. From 1920 - 2000, compare the name usage of each of the four names. What trends do you notice?__
+
+_In those years, we see that Mary is the most famous, follwed by Paul, Peter, and Martha. The most interesting this tonote is the rapid decline in the use of these popular gospel names in the 60's. As time continues on, it does not appear that society will return to using these gospel names._
+
+```{python}
+#| label: Q3
+filterd_names = (names
+                 .filter(['name', 'year', 'Total'])
+                 .query('name == "Paul" or name == "Peter" or name == "Martha" or name == "Mary"')
+                 .query('1920 <= year <= 2000')  # Add this line
+                 )
+```
+
+```{python}
+#| label: Q3 chart
+chart = alt.Chart(filterd_names).mark_line().encode(
+    x=alt.X('year', axis= alt.Axis(format = 'd'), title='Year'),
+    y=alt.Y('Total', title='# of Births'),
+    color=alt.Color('name').title("Names"),
+).properties(title= "Huge Decline in Top 4 Gospel Names in the 60's")
+chart
+```
+
+```{python}
+#| label: Q3 table
+filterd_names
+```
+
+
+
+## QUESTION|TASK 4
+
+__Think of a unique name from a famous movie. Plot the usage of that name and see how changes line up with the movie release. Does it look like the movie had an effect on usage?__
+
+_When I think of the name Leia, I immediately think of Star Wars. According to the data given, it appears as though there may be some correlation to that thought process. We see significant increases in the usage of the name after the introduction of each of the different trilogies that have been released. Though the increases are noticably, it is important to note that the maximum number we see on the graph is 710. While it looks to have a noticable effect, the name did not reach popularity like other frequently used ones._
+
+```{python}
+#| label: Q4
+leia_over_time = (names
+                 .filter(['name', 'year', 'Total'])
+                 .query('name == "Leia"'))
+```
+
+```{python}
+#| label: Q4 chart
+chart = alt.Chart(leia_over_time).mark_line().encode(
+    x=alt.X('year', axis= alt.Axis(format = 'd')),
+    y=alt.Y('Total', title='# of Births'),
+    color=alt.Color('name').title("Name"),
+)
+
+# Data for annotations and reference lines
+annotations_data = pd.DataFrame({
+    'year': [1977, 1999, 2015],
+    'Total': [120, 120, 50],  # Set all y values to 300
+    'text': ["'A New Hope' comes out", "Prequels come out", "'The Force Awakens' comes out"]
+})
+
+# Annotations
+annotations = alt.Chart(annotations_data).mark_text(
+    align='left',
+    baseline='middle',
+    dx=1,  # Nudges text to right so it doesn't appear on top of the bar
+    dy=-5,  # Nudges text upward so it appears above the bar
+    angle=270  # Rotates text 90 degrees
+).encode(
+    x='year:Q',
+    y='Total:Q',  # Use the y values specified in annotations_data
+    text='text'
+).properties(title= "With Each Star Wars Movie, Leia Becomes a More Popular Name")
+
+# Reference lines
+reference_lines = alt.Chart(annotations_data).mark_rule(color='orange').encode(x='year:Q')
+
+# Combine chart, annotations, and reference lines
+leia_chart = chart + annotations + reference_lines
+
+leia_chart
+```
+
+```{python}
+#| label: Q4 table
+leia_over_time
+```
+
+## APPENDIX A (All Python Code)
+
+```python
+#%%
+# load packages
+import pandas as pd
+import altair as alt
+import numpy as np
+alt.data_transformers.enable("vegafusion")
+
+# load data
+url = "https://github.com/byuidatascience/data4names/raw/master/data-raw/names_year/names_year.csv"
+names = pd.read_csv(url)
+# %%
+##########################################
+# BASIC TABLE OF THE DATA
+##########################################
+names
+ # %%
+##########################################
+# QUESTION 1 - QUERY
+##########################################
+sarah_over_time = (names
+                 .filter(['name', 'year', 'Total'])
+                 .query('name == "Sarah"'))
+count = sarah_over_time['Total'].sum()
+
+sarah_over_time
+
+# %%
+##########################################
+# QUESTION 1 - CHART
+##########################################
+# Data for reference line and annotation
+ref_data = pd.DataFrame({'year': [1999], 'Total': [sarah_over_time['Total'].max()], 'text': ['My Birth Year']})
+
+# Main chart
+chart = alt.Chart(sarah_over_time).mark_area(
+    line={'color':'darkgreen'},
+    color=alt.Gradient(
+        gradient='linear',
+        stops=[alt.GradientStop(color='white', offset=0),
+               alt.GradientStop(color='darkgreen', offset=1)],
+        x1=1,
+        x2=1,
+        y1=1,
+        y2=0
+    )
+).encode(
+    x=alt.X('year', axis= alt.Axis(format = 'd'), title='Year'),
+    y=alt.Y('Total', title='# of Births')
+).properties(title= "The Name 'Sarah' Spikes in Popularity")
+
+# Reference line and text annotation
+annotations = alt.Chart(ref_data).mark_rule(color='red').encode(x='year:Q') + \
+              alt.Chart(ref_data).mark_text(align='left', baseline='middle', dx=2).encode(
+                  x='year:Q',
+                  y='Total:Q',
+                  text='text'
+              )
+
+# Combine chart and annotations
+sarah_chart = chart + annotations
+
+sarah_chart
+
+# %%
+##########################################
+# QUESTION 2 - QUERY
+##########################################
+brit_over_time = (names
+                 .filter(['name', 'year', 'Total'])
+                 .query('name == "Brittany"'))
+
+brit_over_time
+
+# %%
+##########################################
+# QUESTION 2 - CHART
+##########################################
+chart = alt.Chart(brit_over_time).mark_area(
+    line={'color':'blue'},
+    color=alt.Gradient(
+        gradient='linear',
+        stops=[alt.GradientStop(color='white', offset=0),
+               alt.GradientStop(color='blue', offset=1)],
+        x1=1,
+        x2=1,
+        y1=1,
+        y2=0
+    )
+).encode(
+    x=alt.X('year', axis= alt.Axis(format = 'd'), title='Year'),
+    y=alt.Y('Total', title='# of Births')
+).properties(title= "'Brittany', a Name Belonging to the 80's and 90's Kids")
+
+# Data for reference lines (without text annotations)
+ref_data = pd.DataFrame({'year': [1980, 2000]})
+
+# Reference lines
+reference_lines = alt.Chart(ref_data).mark_rule(color='orange').encode(x='year:Q')
+
+# Combine chart and reference lines
+brit_chart = chart + reference_lines
+
+brit_chart
+
+# %%
+##########################################
+# QUESTION 3 - QUERY
+##########################################
+filterd_names = (names
+                 .filter(['name', 'year', 'Total'])
+                 .query('name == "Paul" or name == "Peter" or name == "Martha" or name == "Mary"')
+                 .query('1920 <= year <= 2000')  # Add only the dates we need
+                 )
+
+# %%
+##########################################
+# QUESTION 3 - CHART
+##########################################
+chart = alt.Chart(filterd_names).mark_line().encode(
+    x=alt.X('year', axis= alt.Axis(format = 'd'), title='Year'),
+    y=alt.Y('Total', title='# of Births'),
+    color=alt.Color('name').title("Names"),
+).properties(title= "Huge Decline in Top 4 Gospel Names in the 60's")
+chart
+
+# %%
+##########################################
+# QUESTION 4 - QUERY
+##########################################
+leia_over_time = (names
+                 .filter(['name', 'year', 'Total'])
+                 .query('name == "Leia"'))
+count = leia_over_time['Total'].sum()
+
+##########################################
+# QUESTION 4 - CHART
+##########################################
+chart = alt.Chart(leia_over_time).mark_line().encode(
+    x=alt.X('year', axis= alt.Axis(format = 'd')),
+    y=alt.Y('Total', title='# of Births'),
+    color=alt.Color('name').title("Name"),
+)
+
+# Data for annotations and reference lines
+annotations_data = pd.DataFrame({
+    'year': [1977, 1999, 2015],
+    'Total': [120, 120, 50],  # My Annotations location on the y-axis
+    'text': ["'A New Hope' comes out", "Prequels come out", "'The Force Awakens' comes out"]
+})
+
+# Annotations
+annotations = alt.Chart(annotations_data).mark_text(
+    align='left',
+    baseline='middle',
+    dx=1,  # Nudges text to right so it doesn't appear on top of the bar
+    dy=-5,  # Nudges text upward so it appears above the bar
+    angle=270  # Rotates text 270 degrees
+).encode(
+    x='year:Q',
+    y='Total:Q',  # Use the y values specified in annotations_data
+    text='text'
+).properties(title= "With Each Star Wars Movie, Leia Becomes a More Popular Name")
+
+# Reference lines
+reference_lines = alt.Chart(annotations_data).mark_rule(color='orange').encode(x='year:Q')
+
+# Combine chart, annotations, and reference lines
+leia_chart = chart + annotations + reference_lines
+
+leia_chart
+
+# %%
+
+```
