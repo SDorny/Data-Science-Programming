@@ -18,9 +18,9 @@ data = pd.read_json("https://raw.githubusercontent.com/byuidatascience/data4miss
 data.describe()
 
 # %%
-data.value_counts()
+data.month.unique()
 
 #%%
-data.isna().sum()
+data.isna().sum().sum()
 
 # %%
