@@ -4,35 +4,64 @@ import sqlite3
 
 con = sqlite3.connect('lahmansbaseballdb.sqlite')
 
-df = pd.read_sql_query('SELECT * FROM fielding LIMIT 5;', con)
-
-df
-
-
-# %%
-con = sqlite3.connect('lahmansbaseballdb.sqlite')
-df = pd.read_sql_query('SELECT AB, H FROM batting LIMIT 2;', con)
-
-df
-
-# %%
-df = pd.read_sql_query('SELECT * FROM Schools WHERE city == "Rexburg";', con)
-
-df
 # %%
 #########################
 # QUESTION 1
 # schoolID = idbyuid
 # name_full = Brigham Young University-Idaho
 #########################
-df = pd.read_sql_query(
-    'SELECT playerID, schoolID, yearID FROM CollegePlaying WHERE schoolID == "idbyuid";', con)
+query1 = pd.read_sql_query(
+    '''SELECT CollegePlaying.playerID, CollegePlaying.schoolID, Salaries.salary, CollegePlaying.yearID, Salaries.teamID
+    FROM CollegePlaying
+    JOIN Salaries
+    ON Salaries.playerID = CollegePlaying.playerID
+    WHERE CollegePlaying.schoolID == 'idbyuid'
+    ORDER BY Salaries.salary DESC;''', 
+    con)
 
-df
+query1
+#%%
+###########################
+# Salaries Table
+###########################
+salaries = pd.read_sql_query(
+    'SELECT * FROM Salaries;', con)
 
-# %%
-df = pd.read_sql_query(
-    'SELECT playerID, schoolID, yearID, salary, teamID FROM CollegePlaying LEFTJOIN Salaries ON playerID WHERE schoolID == "idbyuid";', con)
+salaries
+#%%
+###########################
+# CollegePlaying Table
+###########################
+college = pd.read_sql_query(
+    'SELECT * FROM CollegePlaying;', con)
 
-df
+college
+
+######################################################################################################################################################
+#%%
+#########################
+# QUESTION 2
+# Probably need to clean data
+#########################
+query2 = pd.read_sql_query(
+    '''SELECT Salaries.playerID, CAST((Batting.H/Batting.AB) AS FLOAT) AS battingAvg, Salaries.yearID
+    FROM Batting
+    JOIN Salaries
+    ON Salaries.playerID = Batting.playerID
+    WHERE Batting.AB > 0 AND Salaries.yearID = 2001
+    ORDER BY battingAvg DESC
+    LIMIT 5;''', 
+    con)
+
+query2
+
+
+#%%
+###########################
+# CollegePlaying Table
+###########################
+batting = pd.read_sql_query(
+    'SELECT * FROM Batting;', con)
+
+batting
 # %%
