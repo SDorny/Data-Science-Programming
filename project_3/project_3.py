@@ -90,11 +90,11 @@ query2
 # Probably need to clean data
 #########################
 query2 = pd.read_sql_query(
-    '''SELECT 
+    '''SELECT Salaries.playerID, CAST((Batting.H/Batting.AB) AS FLOAT) AS battingAvg, Salaries.yearID
     FROM Batting
     JOIN Salaries
     ON Salaries.playerID = Batting.playerID
-    WHERE Batting.AB > 10 AND Salaries.yearID = 2001
+    WHERE Batting.AB > 100
     ORDER BY battingAvg DESC
     LIMIT 5;''', 
     con)
