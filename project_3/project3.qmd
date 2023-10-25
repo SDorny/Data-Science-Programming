@@ -1,0 +1,276 @@
+---
+title: "From the Diamond to the Database: Exploring BYU-Idaho Baseball Stats with SQL"
+subtitle: "Course DS 250"
+author: "Sarah Dorny"
+execute: 
+  warning: false
+  echo: false
+format:
+  html:
+    self-contained: true
+    page-layout: full
+    title-block-banner: true
+    toc: true
+    toc-depth: 3
+    toc-location: body
+    number-sections: false
+    html-math-method: katex
+    code-fold: true
+    code-summary: "Show the code"
+    code-overflow: wrap
+    code-copy: hover
+    code-tools:
+        source: false
+        toggle: true
+        caption: See code
+    
+---
+
+```{python}
+#| label: libraries
+#| include: false
+import pandas as pd
+import numpy as np
+import sqlite3
+import altair as alt
+alt.data_transformers.enable("vegafusion")
+
+con = sqlite3.connect('lahmansbaseballdb.sqlite')
+```
+
+
+## Intro
+_"One of the highest paid sports in the world is baseball! But salaries differ from player to player. What stats determine how good a player is or how much they get paid? This analysis delves into the world of baseball, focusing on players who attended BYU-Idaho and their performance metrics. By the end, you'll understand unique insights about how these stats might be calculated."_
+
+```{python}
+data = pd.read_json("https://raw.githubusercontent.com/byuidatascience/data4missing/master/data-raw/flights_missing/flights_missing.json")
+
+data = data.replace('n/a', np.nan)
+data = data.replace(-999, np.nan)
+data = data.replace(+1500, 1500)
+```
+
+
+## Which baseball players attended BYU-Idaho? Which made the highest salary?
+
+_Matt Lindstrom and Garrett Stephenson, both pitchers, were drafted from Brigham Young University - Idaho. Lindstrom ended his career making 4 million Stephenson was making over 1 million at his highest paid point._
+
+```{python}
+query1 = pd.read_sql_query(
+    '''SELECT DISTINCT cp.playerID, cp.schoolID, s.salary, cp.yearID, s.teamID
+        FROM CollegePlaying cp
+        JOIN Salaries s
+        ON s.playerID = cp.playerID
+        WHERE cp.playerID = s.playerID AND schoolID = 'idbyuid'
+        ORDER BY s.salary DESC;''', 
+    con)
+
+query1
+
+```
+
+## Top Five Batting Averages of 2010 - All Players
+
+_These players had 100% batting average in 2010! But wait, is there more to this story? Yes, we see they only batted once, and hit once._
+
+```{python}
+query2a = pd.read_sql_query(
+    '''SELECT playerID, 1.0*H / AB AS battingAvg, H AS Hits, AB AS AtBats, yearID
+        FROM Batting
+        WHERE AB >= 1 AND yearID = 2010
+        ORDER BY battingAvg DESC
+        LIMIT 5;''', 
+    con)
+
+query2a
+```
+
+## Top Five Batting Averages of 2010 - Players with at Least 10 At Bats
+
+_Lets raise the stakes. Players who were at bat at least ten times in 2010 are shown._
+
+```{python}
+query2b = pd.read_sql_query(
+    '''SELECT playerID, 1.0*H / AB AS battingAvg, H AS Hits, AB AS AtBats, yearID
+        FROM Batting
+        WHERE AB >= 10 AND yearID = 2010
+        ORDER BY battingAvg DESC
+        LIMIT 5;''', 
+    con)
+
+query2b
+```
+
+## Top Five Batting Averages of All Time - Players  with at least 100 At Bats
+
+_These player had the top batting averages off all time, that we have data for of course._
+
+```{python}
+query2c = pd.read_sql_query(
+    '''SELECT playerID, 1.0*SUM(H) / SUM(AB) AS battingAvg, SUM(H) AS Hits, SUM(AB) AS AtBats
+        FROM Batting
+        GROUP BY playerID
+        HAVING SUM(AB) > 100
+        ORDER BY battingAvg DESC
+        LIMIT 5;''', 
+    con)
+
+query2c
+```
+
+## Baseballs Biggest Rivals - Who has the most Home Runs?
+
+_Baseball's biggest rivals, the New York Yankees and the Boston Red Sox. Below we have gathered over a decade worth of data to compare the number of home runs by team. Though the teams follow a similar pattern, we see that the New York Yankees are consistantly on top!_
+
+```{python}
+query3 = pd.read_sql_query(
+    '''SELECT teamID, name, HR, yearID
+    FROM Teams
+    WHERE (yearID > '2006' AND name == 'New York Yankees') OR (yearID > '2006' AND name == 'Boston Red Sox');''', 
+    con)
+
+query3
+```
+
+```{python}
+source = query3
+
+domain = ['New York Yankees', 'Boston Red Sox']
+range_ = ['#003087', '#BD3039']
+
+alt.Chart(
+    source,
+    title=alt.Title(
+        "The Battle For Homeruns in the Past Decade",
+        subtitle=["The two rivals follow a similar pattern,", "yet the Yankees remain on top."]
+    )).mark_line().encode(
+    alt.X('yearID:T').scale(zero=False).title('Year'),
+    alt.Y('HR:Q').scale(zero=False).title('# of Home Runs'),
+    color=alt.Color('name:N').title("Team Name").scale(domain=domain, range=range_),
+).configure_axis(
+    grid=False
+).configure_view(
+    stroke=None
+)
+```
+
+## APPENDIX A (All Python Code)
+```python
+#%%
+import pandas as pd
+import sqlite3
+import altair as alt
+alt.data_transformers.enable("vegafusion")
+
+con = sqlite3.connect('lahmansbaseballdb.sqlite')
+######################################################################################################################################################
+# %%
+"""Question 1"""
+query1 = pd.read_sql_query(
+    '''SELECT DISTINCT cp.playerID, cp.schoolID, s.salary, cp.yearID, s.teamID
+        FROM CollegePlaying cp
+        JOIN Salaries s
+        ON s.playerID = cp.playerID
+        WHERE cp.playerID = s.playerID AND schoolID = 'idbyuid'
+        ORDER BY s.salary DESC;''', 
+    con)
+
+query1
+######################################################################################################################################################
+#%%
+"""Question 2a"""
+query2 = pd.read_sql_query(
+    '''SELECT playerID, 1.0*H / AB AS battingAvg, H AS Hits, AB AS AtBats, yearID
+        FROM Batting
+        WHERE AB >= 1 AND yearID = 2010
+        ORDER BY battingAvg DESC
+        LIMIT 5;''', 
+    con)
+
+query2
+
+# %%
+"""Question 2b"""
+query2 = pd.read_sql_query(
+    '''SELECT playerID, 1.0*H / AB AS battingAvg, H AS Hits, AB AS AtBats, yearID
+        FROM Batting
+        WHERE AB >= 100 AND yearID = 2010
+        ORDER BY battingAvg DESC
+        LIMIT 5;''', 
+    con)
+
+query2
+# %%
+"""Question 2c"""
+query2 = pd.read_sql_query(
+    '''SELECT playerID, 1.0*SUM(H) / SUM(AB) AS battingAvg, H AS Hits, AB AS AtBats
+        FROM Batting
+        GROUP BY playerID
+        HAVING SUM(AB) >= 100
+        ORDER BY battingAvg DESC
+        LIMIT 5;''', 
+    con)
+
+query2
+######################################################################################################################################################
+# %%,
+"""Question 3"""
+query3 = pd.read_sql_query(
+    '''SELECT teamID, name, HR, yearID
+    FROM Teams
+    WHERE (yearID > '2006' AND name == 'New York Yankees') OR (yearID > '2006' AND name == 'Boston Red Sox');''', 
+    con)
+
+query3
+#%%
+source = query3
+
+domain = ['New York Yankees', 'Boston Red Sox']
+range_ = ['#003087', '#BD3039']
+
+alt.Chart(
+    source,
+    title=alt.Title(
+        "The Battle For Homeruns in the Past Decade",
+        subtitle=["The two rivals follow a similar pattern,", "yet the Yankees remain on top."]
+    )).mark_line().encode(
+    alt.X('yearID:T').scale(zero=False).title('Year'),
+    alt.Y('HR:Q').scale(zero=False).title('# of Home Runs'),
+    color=alt.Color('name:N').title("Team Name").scale(domain=domain, range=range_),
+).configure_axis(
+    grid=False
+).configure_view(
+    stroke=None
+)
+
+######################################################################################################################################################
+#%%
+"""Teams Table"""
+team = pd.read_sql_query(
+    '''SELECT * FROM Teams
+    WHERE name = "New York Yankees";''', con)
+
+team
+#%%
+"""Batting Table"""
+batting = pd.read_sql_query(
+    '''SELECT AB
+    FROM Batting
+    WHERE H > 0;''', con)
+
+batting
+#%%
+"""Salaries Table"""
+salaries = pd.read_sql_query(
+    'SELECT * FROM Salaries;', con)
+
+salaries
+#%%
+"""College Playing Table"""
+college = pd.read_sql_query(
+    'SELECT * FROM CollegePlaying;', con)
+
+college
+
+
+```
