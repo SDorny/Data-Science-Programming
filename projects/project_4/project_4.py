@@ -14,3 +14,9 @@ print(ml_dat.shape)
 
 # %%
 print(ml_dat.columns)
+
+# %%
+alt.Chart(data= denver).mark_point().encode(
+    x = alt.X('yrbuilt'),
+    y = 'livearea'
+)
