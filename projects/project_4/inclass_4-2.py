@@ -4,6 +4,7 @@ import pandas as pd
 import altair as alt
 import numpy as np
 import seaborn as sns
+alt.data_transformers.enable("vegafusion")
 
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
@@ -17,23 +18,100 @@ denver = pd.read_csv('https://raw.githubusercontent.com/byuidatascience/data4dwe
 ml_dat = pd.read_csv('https://raw.githubusercontent.com/byuidatascience/data4dwellings/master/data-raw/dwellings_ml/dwellings_ml.csv')
 
 alt.data_transformers.disable_max_rows()
-subset_data = ml_dat.sample(n = 4999)
+denver_sample = denver.sample(n=100)
+subset_data = ml_dat.sample(n = 100)
 
-# %%
-ml_dat.columns
+
+
+
+
+
+
+
+#########################################################################
+## Build 2 Charts that Evaluate Potentail Relationships
+##########################################################################
+sample_chart = subset_data
+#%%
+
+sample_chart.columns
 
 #%%
-x = ml_dat.filter(['finbsmnt', 'basement'])
+source = sample_chart
+
+alt.Chart(source).mark_circle(size=60).encode(
+    alt.X('yrbuilt', axis=alt.Axis(format='d')).scale(domain=(1950, 2015)).title('Year Built'),
+    alt.Y('numbaths').title('# of Baths'),
+    color='before1980:N',
+).interactive()
+
+
+#%%
+source = sample_chart
+
+alt.Chart(source).mark_circle(size=60).encode(
+    alt.X('yrbuilt', axis=alt.Axis(format='d')).scale(domain=(1950, 2015)).title('Year Built'),
+    alt.Y('stories').title('# of Floors'),
+    color='before1980:N'
+).interactive()
+
+
+#%%
+x = ml_dat.filter(['livearea', 'finbsmnt', 'basement', 'nocars', 
+                   'numbdrm', 'numbaths', 'gartype_Att/Det', 'arcstyle_CONVERSIONS', 'arcstyle_END UNIT',
+       'arcstyle_MIDDLE UNIT', 'arcstyle_TWO-STORY'])
+
 y= ml_dat.before1980
 
+
+
+
+
+
+
+
 #%%
-X_train, X_test, y_train, y_test = train_test_split(x, y, random_state=166,test_size=0.2, shuffle=True)
+#########################################################################
+## Build a Classification Model
+##########################################################################
+X_train, X_test, y_train, y_test = train_test_split(x, y, random_state=166,test_size=0.2)
 
 # create the model
-classifier = DecisionTreeClassifier()
+classifier = RandomForestClassifier()
 
-classifier.fit(x_train, y_train)
+classifier.fit(X_train, y_train)
 
-y_predicitons = classifer.predict(x_test)
+y_predicitons = classifier.predict(X_test)
 
+metrics.accuracy_score(y_test, y_predicitons)
+
+
+
+
+
+
+#%%
+#########################################################################
+## Justify Your Classification Model 
+##########################################################################
+
+importance = classifier.feature_importances_
+# summarize feature importance
+for i,v in enumerate(importance):
+ print('Feature: %0d, Score: %.5f' % (i,v))
+
+
+
+
+
+
+
+
+
+
+# %%
+####################################
+## Quality of your classification
+#####################################
+print(metrics.classification_report(y_test, y_predicitons))
 
