@@ -1,0 +1,225 @@
+---
+title: "Built Before or After 1980?: A Machine Learning Prediction"
+subtitle: "Course DS 250"
+author: "Sarah Dorny"
+execute: 
+  warning: false
+  echo: false
+format:
+  html:
+    self-contained: true
+    page-layout: full
+    title-block-banner: true
+    toc: true
+    toc-depth: 3
+    toc-location: body
+    number-sections: false
+    html-math-method: katex
+    code-fold: true
+    code-summary: "Show the code"
+    code-overflow: wrap
+    code-copy: hover
+    code-tools:
+        source: false
+        toggle: true
+        caption: See code
+    
+---
+
+```{python}
+#| label: libraries
+#| include: false
+import pandas as pd
+import altair as alt
+alt.data_transformers.enable("vegafusion")
+
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import metrics
+
+```
+
+
+## Intro
+_"If you were to look at a house, would you be able to identify if it was built before 1980? Probably not. Thanks to modern day technology and the copious amounts of data in the world, we can!"_
+
+```{python}
+denver = pd.read_csv('https://raw.githubusercontent.com/byuidatascience/data4dwellings/master/data-raw/dwellings_denver/dwellings_denver.csv')
+ml_dat = pd.read_csv('https://raw.githubusercontent.com/byuidatascience/data4dwellings/master/data-raw/dwellings_ml/dwellings_ml.csv')
+
+alt.data_transformers.disable_max_rows()
+denver_sample = denver.sample(n=100)
+subset_data = ml_dat.sample(n = 100)
+sample_chart = subset_data
+```
+
+
+## Identifying Two Variables to Help us Predict: Number of Baths and Number of Stories
+
+_In or to predict something, we have to have something to go off of. One might be able to predict a impending rainstorm based off of stormy clouds on the horizon. For our case, we take a look at our own "storm clouds", otherwise known as features, to see what will help us predict if a house is before or after 1980. In the plots below, we see an increase in the number of baths as well as the number of stories in houses after 1980. These look like great features!_
+
+```{python}
+sample_chart["before1980"].replace({0:"No",1:"Yes"}, inplace=True)
+source = sample_chart
+
+alt.Chart(source).mark_circle(size=60).encode(
+    alt.X('yrbuilt', axis=alt.Axis(format='d')).scale(domain=(1950, 2015)).title('Year Built'),
+    alt.Y('numbaths').title('# of Baths'),
+    color='before1980:N',
+).interactive()
+
+```
+
+```{python}
+alt.Chart(source).mark_circle(size=60).encode(
+    alt.X('yrbuilt', axis=alt.Axis(format='d')).scale(domain=(1950, 2015)).title('Year Built'),
+    alt.Y('stories').title('# of Floors'),
+    color='before1980:N'
+).interactive()
+
+```
+
+
+## Creating the Model and Measuring Accuracy
+
+_We've looked at the rest of the data and identified other variables that have a similar correlation. Here we built the model and get and accuracy score. We are at over 91% accuracy!_
+
+```{python}
+x = ml_dat.filter(['livearea', 'finbsmnt', 'basement', 'nocars', 
+                   'numbdrm', 'numbaths', 'gartype_Att/Det', 
+       'gartype_Det', 'arcstyle_CONVERSIONS', 'arcstyle_END UNIT',
+       'arcstyle_MIDDLE UNIT', 'arcstyle_ONE AND HALF-STORY',
+       'arcstyle_TRI-LEVEL', 'arcstyle_TRI-LEVEL WITH BASEMENT',
+       'arcstyle_TWO AND HALF-STORY', 'arcstyle_TWO-STORY'])
+
+y= ml_dat.before1980
+
+X_train, X_test, y_train, y_test = train_test_split(x, y, random_state=166,test_size=0.2)
+
+# create the model
+classifier = RandomForestClassifier()
+
+classifier.fit(X_train, y_train)
+
+y_predicitons = classifier.predict(X_test)
+
+metrics.accuracy_score(y_test, y_predicitons)
+```
+
+## Not all Features are Created Equal
+
+_Some features are not as helpful in our predictions as others are. This can create noise in our model and reduce accuracy when given new data. Thankfully, we are able to asses how useful features are based on how helpful they are at predicting a variable through "Feature Importance". Above, we identified "Number of Baths" and "Number of Stories" as features that would be very important, but it appears that there is far lesscorrelation than others. The most important feature we have identified is the Live Area of the house. That has significantly increased after the year 1980!_
+
+```{python}
+importance = classifier.feature_importances_
+# summarize feature importance
+for i,v in enumerate(importance):
+ print('Feature: %0d, Score: %.5f' % (i,v))
+
+```
+
+```{python}
+source = sample_chart
+
+alt.Chart(source).mark_circle(size=60).encode(
+    alt.X('yrbuilt', axis=alt.Axis(format='d')).scale(domain=(1950, 2015)).title('Year Built'),
+    alt.Y('livearea').title('Live Area'),
+    color='before1980:N',
+).interactive()
+```
+
+## Is Accuracy the Only Way To Measure a Models Effectiveness?
+
+_No! A model may be good at predicting houses after 1980 but not as good at predicting before 1980. Sounds odds right? This is better understood by looking at a confusion matrix._
+
+```{python}
+print(metrics.classification_report(y_test, y_predicitons))
+```
+
+_From the output above, we see "Precision", "Recall", and "f1-Score". We see the biggest difference between our precision, which means our model is more likely to predict that a house is before1980 when it isnt._
+
+## APPENDIX A (All Python Code)
+```python
+import pandas as pd
+import altair as alt
+alt.data_transformers.enable("vegafusion")
+
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import metrics
+
+denver = pd.read_csv('https://raw.githubusercontent.com/byuidatascience/data4dwellings/master/data-raw/dwellings_denver/dwellings_denver.csv')
+ml_dat = pd.read_csv('https://raw.githubusercontent.com/byuidatascience/data4dwellings/master/data-raw/dwellings_ml/dwellings_ml.csv')
+
+alt.data_transformers.disable_max_rows()
+denver_sample = denver.sample(n=100)
+subset_data = ml_dat.sample(n = 100)
+
+#########################################################################
+## Build 2 Charts that Evaluate Potentail Relationships
+##########################################################################
+sample_chart = subset_data
+
+sample_chart.columns
+
+source = sample_chart
+
+alt.Chart(source).mark_circle(size=60).encode(
+    alt.X('yrbuilt', axis=alt.Axis(format='d')).scale(domain=(1950, 2015)).title('Year Built'),
+    alt.Y('numbaths').title('# of Baths'),
+    color='before1980:N',
+).interactive()
+
+source = sample_chart
+
+alt.Chart(source).mark_circle(size=60).encode(
+    alt.X('yrbuilt', axis=alt.Axis(format='d')).scale(domain=(1950, 2015)).title('Year Built'),
+    alt.Y('stories').title('# of Floors'),
+    color='before1980:N'
+).interactive()
+
+#########################################################################
+## Build a Classification Model
+
+x = ml_dat.filter(['livearea', 'finbsmnt', 'basement', 'nocars', 
+                   'numbdrm', 'numbaths', 'gartype_Att/Det', 
+       'gartype_Det', 'arcstyle_CONVERSIONS', 'arcstyle_END UNIT',
+       'arcstyle_MIDDLE UNIT', 'arcstyle_ONE AND HALF-STORY',
+       'arcstyle_TRI-LEVEL', 'arcstyle_TRI-LEVEL WITH BASEMENT',
+       'arcstyle_TWO AND HALF-STORY', 'arcstyle_TWO-STORY'])
+
+y= ml_dat.before1980
+
+X_train, X_test, y_train, y_test = train_test_split(x, y, random_state=166,test_size=0.2)
+
+# create the model
+classifier = RandomForestClassifier()
+
+classifier.fit(X_train, y_train)
+
+y_predicitons = classifier.predict(X_test)
+
+metrics.accuracy_score(y_test, y_predicitons)
+
+#########################################################################
+## Justify Your Classification Model 
+##########################################################################
+
+importance = classifier.feature_importances_
+# summarize feature importance
+for i,v in enumerate(importance):
+ print('Feature: %0d, Score: %.5f' % (i,v))
+
+source = sample_chart
+
+alt.Chart(source).mark_circle(size=60).encode(
+    alt.X('yrbuilt', axis=alt.Axis(format='d')).scale(domain=(1950, 2015)).title('Year Built'),
+    alt.Y('livearea').title('Live Area'),
+    color='before1980:N',
+).interactive()
+
+####################################
+## Quality of your classification
+#####################################
+print(metrics.classification_report(y_test, y_predicitons))
+```
