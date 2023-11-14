@@ -56,7 +56,7 @@ sample_chart = subset_data
 
 ## Identifying Two Variables to Help us Predict: Number of Baths and Number of Stories
 
-_In or to predict something, we have to have something to go off of. One might be able to predict a impending rainstorm based off of stormy clouds on the horizon. For our case, we take a look at our own "storm clouds", otherwise known as features, to see what will help us predict if a house is before or after 1980. In the plots below, we see an increase in the number of baths as well as the number of stories in houses after 1980. These look like great features!_
+_In or to predict something, we have to have something to go off of. One might be able to predict a impending rainstorm based off of stormy clouds on the horizon. For our case, we take a look at our own "storm clouds", otherwise known as features, to see what will help us predict if a house is before or after 1980._ 
 
 ```{python}
 sample_chart["before1980"].replace({0:"No",1:"Yes"}, inplace=True)
@@ -70,6 +70,8 @@ alt.Chart(source).mark_circle(size=60).encode(
 
 ```
 
+_In the plot above, we see an increase in the number of baths after 1980. These could be a great feature!_
+
 ```{python}
 alt.Chart(source).mark_circle(size=60).encode(
     alt.X('yrbuilt', axis=alt.Axis(format='d')).scale(domain=(1950, 2015)).title('Year Built'),
@@ -79,6 +81,7 @@ alt.Chart(source).mark_circle(size=60).encode(
 
 ```
 
+_Again, we see an increase in the number of stories after 1980. It looks like buildings got taller after 1980. These could be a great feature too!_
 
 ## Creating the Model and Measuring Accuracy
 
@@ -136,7 +139,7 @@ _No! A model may be good at predicting houses after 1980 but not as good at pred
 print(metrics.classification_report(y_test, y_predicitons))
 ```
 
-_From the output above, we see "Precision", "Recall", and "f1-Score". We see the biggest difference between our precision, which means our model is more likely to predict that a house is before1980 when it isnt._
+_From the output above, we see "Precision", "Recall", and "f1-Score". We see the biggest difference between our precision, which means our model is more likely to predict that a house is before 1980 when it isnt._
 
 ## APPENDIX A (All Python Code)
 ```python
