@@ -17,7 +17,18 @@ data.head()
 
 # Assuming df is your DataFrame and 'oldName' is the name of the column you want to change
 clean_data= data.rename(columns={'Have you seen any of the 6 films in the Star Wars franchise?': 'seen_any',
-                                 'Gender':'gender'
+                                 'Do you consider yourself to be a fan of the Star Wars film franchise?': 'is_fan',
+                                 'Which of the following Star Wars films have you seen? Please select all that apply.':'seen_1',
+                                 'Unnamed: 4':'seen_2',
+                                 'Unnamed: 5':'seen_3',
+                                 'Unnamed: 6':'seen_4',
+                                 'Unnamed: 7':'seen_5',
+                                 'Unnamed: 8':'seen_6',
+                                 'Gender':'gender',
+                                 'Age':'age',
+                                 'Household Income':'income',
+                                 'Education':'latest_degree',
+                                 'Location (Census Region)':'region'
                                  })
 
 
