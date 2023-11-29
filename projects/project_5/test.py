@@ -1,21 +1,19 @@
 ####################################################################################
-# IMPORTING
+# STEP 1: IMPORTING
 ####################################################################################
 #%%
 import pandas as pd 
 import altair as alt
 import numpy as np
+alt.data_transformers.enable("vegafusion")
 
 url = 'https://github.com/fivethirtyeight/data/raw/master/star-wars-survey/StarWars.csv'
 
 # Data only
 data = pd.read_csv(url, encoding='cp1252')
-# Columns only
-columns = pd.read_csv(url, encoding='cp1252', nrows=2, header=None)
-
 
 ####################################################################################
-# TRANSFORMING
+# STEP 1: TRANSFORMING
 ####################################################################################
 #%%
 data.head()
@@ -61,31 +59,74 @@ clean_data= data.rename(columns={'Have you seen any of the 6 films in the Star W
                                  })
 
 #%%
-clean_data.head()
-#%%
-df = clean_data.drop(clean_data.index[1])
+df = clean_data.drop(clean_data.index[0])
 df.head()
 
 
 
-####################################################################################
-# FILTERING
-####################################################################################
+#********************************************************************************************************
 #%%
 
+####################################################################################
+# STEP 3: CHART 1
+####################################################################################
+# People who have seen all six movies
 df = df[df['seen_any'] != 'No']
-
-#unique_values = df['seen_any'].unique()
-#print(unique_values)
+df = df.dropna(subset=['seen_1', 'seen_2', 'seen_3', 'seen_4', 'seen_5', 'seen_6'])
 
 
+#%%
+# Figuring out the counts and percentages
+fav1=df['fav_1'].value_counts()['1']/471
+fav2=df['fav_2'].value_counts()['1']/471
+fav3=df['fav_3'].value_counts()['1']/471
+fav4=df['fav_4'].value_counts()['1']/471
+fav5=df['fav_5'].value_counts()['1']/471
+fav6=df['fav_6'].value_counts()['1']/471
 
+#%%
 
+# Creating the first chart
+df1 = pd.DataFrame({
+    'votes': [fav1,fav2,fav3,fav4,fav5,fav6],
+    'movies': ['The Phantom Menace', 'Attack of the Clones', 'Revenge of the Sith', 
+                     'A New Hope', 'The Empire Strikes Back', 'Return of the Jedi'],
+})
 
+df1
+#%%
+# Define your base chart
+
+base = alt.Chart(df1,
+        title=alt.Title(
+       "What's the Best 'Star Wars' Movie?",
+       subtitle="Of 471 respondents who have seen all six films",
+       anchor='start'
+   )).encode(
+    alt.X('votes', title='Votes', axis=None),
+    alt.Y("movies", sort=df1['movies'].tolist(), axis=alt.Axis(title=None)),
+    text=alt.Text('votes', format='.0%')
+)
+
+# Define your bar and text charts
+bar_chart = base.mark_bar(color='#008ED4')
+text_chart = base.mark_text(align='left', dx=2)
+
+# Layer your charts
+layered_chart = bar_chart + text_chart
+
+# Set the configuration on the layered chart
+configured_chart = layered_chart.configure_axis(
+    grid=False
+).configure(background='#F1F0F1'
+).configure_view(
+    stroke=None
+)
+
+configured_chart
 
 ####################################################################################
-# I am done for this week. Need to ask what we should do for age ranges, income ranges 
-#
+# STEP 3: CHART 2
 ####################################################################################
 
 
@@ -99,65 +140,29 @@ df = df[df['seen_any'] != 'No']
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# def replace_values(val):
-#     if pd.isnull(val):
-#         return 'No'
-#     elif 'Star Wars' in val:
-#         return 'Yes'
-#     else:
-#         return val
-
-# # Assuming df is your DataFrame
-# columns = ['seen_1', 'seen_2', 'seen_3', 'seen_4', 'seen_5', 'seen_6']
-# df[columns] = df[columns].map(replace_values)
-
-
 #%%
-seen_it = (clean_data
-            .filter(['seen_any', 'gender']))
+# seen_it = clean_data['seen_any'].value_counts()['Yes']
+# havent_seen = clean_data['seen_any'].value_counts()['No']
 
-#male_seen_it = seen_it.query('gender'=='Male')
-male = seen_it[seen_it['gender'] != 'Female']
+# #%%
+# total_counts= seen_it+havent_seen
+# total_counts
 
-male.dropna()
+# #%%
+# percent_seen_it=seen_it/total_counts
+# percent_seen_it
 
+# ###########################################################################
+# #%%
 
+# m_seen_it = male['seen_any'].value_counts()['Yes']
+# m_havent_seen = male['seen_any'].value_counts()['No']
+# m_total_counts= m_seen_it+m_havent_seen
+# m_total_counts
 
-#%%
-seen_it = clean_data['seen_any'].value_counts()['Yes']
-havent_seen = clean_data['seen_any'].value_counts()['No']
-total_counts= seen_it+havent_seen
-total_counts
-
-#%%
-percent_seen_it=seen_it/total_counts
-percent_seen_it
-
-###########################################################################
-#%%
-
-m_seen_it = male['seen_any'].value_counts()['Yes']
-m_havent_seen = male['seen_any'].value_counts()['No']
-m_total_counts= m_seen_it+m_havent_seen
-m_total_counts
-
-#%%
-m_percent_seen_it=m_seen_it/m_total_counts
-m_percent_seen_it
+# #%%
+# m_percent_seen_it=m_seen_it/m_total_counts
+# m_percent_seen_it
 
 
 
@@ -165,21 +170,7 @@ m_percent_seen_it
 
 
 
-#%%
-total = clean_data['seen_any'].value_counts()
-total
+# #%%
+# total = clean_data['seen_any'].value_counts()
+# total
 
-#%%
-
-# %%
-'''
-id,
-seen_any,
-is_fan,
-seen_1,
-seen_2,
-seen_3,
-seen_4,
-seen_5,
-seen_6,
-'''
