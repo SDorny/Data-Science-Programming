@@ -64,29 +64,267 @@ df.head()
 
 
 
-#********************************************************************************************************
 #%%
+####################################################################################
+# STEP 2
+####################################################################################
+"""QUESTION 2 a)"""
+have_seen_star_wars = df[df['seen_any'] == 'Yes']
+have_seen_star_wars
 
+# %%
+have_seen_star_wars
+
+# %%
+"""QUESTION 2 b)"""
+have_seen_star_wars['age'].unique()
+
+def convert_age_range_to_number(age_range):
+    if age_range == '18-29':
+        return 1
+    elif age_range == '30-44':
+        return 2
+    elif age_range == '45-60':
+        return 3
+    elif age_range == '> 60':
+        return 4
+    else:
+        return 0
+# %%
+have_seen_star_wars['age_number'] = have_seen_star_wars['age'].apply(convert_age_range_to_number)
+
+# %%
+have_seen_star_wars.drop('age', axis=1, inplace=True)
+
+# %%
+have_seen_star_wars
+
+# %%
+data['education'].unique()
+# %%
+"""QUESTION 2 c)"""
+def convert_education_to_number(education):
+    if education == 'High school degree':
+        return 1
+    elif education == 'Bachelor degree':
+        return 2
+    elif education == 'Some college or Associate degree':
+        return 3
+    elif education == 'Graduate degree':
+        return 4
+    elif education == 'Less than high school degree':
+        return 5
+    else:
+        return 0
+# %%
+have_seen_star_wars['education_number'] = have_seen_star_wars['education'].apply(convert_education_to_number)
+
+# %%
+have_seen_star_wars.drop('education', axis=1, inplace=True)
+
+# %%
+have_seen_star_wars
+
+# %%
+have_seen_star_wars['age_number'].unique()
+
+# %%
+have_seen_star_wars['education_number'].unique()
+
+# %%
+"""QUESTION 2 d)"""
+have_seen_star_wars['household_income'].unique()
+
+# %%
+def convert_income_to_number(income):
+    if income == '$0 - $24,999':
+        return 1
+    elif income == '$25,000 - $49,999':
+        return 2
+    elif income == '$50,000 - $99,999':
+        return 3
+    elif income == '$100,000 - $149,999':
+        return 4
+    elif income == '$150,000+':
+        return 5
+    else:
+        return 0
+
+# %%
+have_seen_star_wars['household_income_number'] = have_seen_star_wars['household_income'].apply(convert_income_to_number)
+
+# %%
+have_seen_star_wars.drop('household_income', axis=1, inplace=True)
+
+# %%
+have_seen_star_wars
+
+# %%
+have_seen_star_wars['household_income_number'].unique()
+
+# %%
+"""QUESTION 2 e)"""
+# If the income is 50k or greater then I will consider it as high. Otherwise, low. I am
+# representing that in my target as 1s and 0s, respectively.
+
+def create_income_target(income_number):
+    return 1 if income_number >= 3 else 0
+
+have_seen_star_wars['y'] = have_seen_star_wars['household_income_number'].apply(create_income_target)
+
+# %%
+have_seen_star_wars
+
+# %%
+have_seen_star_wars['y'].unique()
+
+# %%
+"""QUESTION 2 f)"""
+# gender column
+def convert_gender_to_number(gender):
+    if gender == 'Female':
+        return 1
+    elif gender == 'Male':
+        return 2
+    else:
+        return 0
+
+# %%
+have_seen_star_wars['gender_number'] = have_seen_star_wars['gender'].apply(convert_gender_to_number)
+
+# %%
+have_seen_star_wars.drop('gender', axis=1, inplace=True)
+
+# %%
+have_seen_star_wars['gender_number'].unique()
+# %%
+# star_trek_fan column
+def convert_star_trek_fan_to_number(fan):
+    if fan == 'Yes':
+        return 2
+    elif fan == 'No':
+        return 1
+    else:
+        return 0
+
+# %%
+have_seen_star_wars['star_trek_fan_number'] = have_seen_star_wars['star_trek_fan'].apply(convert_star_trek_fan_to_number)
+
+# %%
+have_seen_star_wars.drop('star_trek_fan', axis=1, inplace=True)
+
+# %%
+have_seen_star_wars['star_trek_fan_number'].unique()
+
+# %%
+# expanded_universe_fan column
+def convert_expanded_universe_fan_to_number(fan):
+    if fan == 'Yes':
+        return 2
+    elif fan == 'No':
+        return 1
+    else:
+        return 0
+
+# %%
+have_seen_star_wars['expanded_universe_fan_number'] = have_seen_star_wars['expanded_universe_fan'].apply(convert_expanded_universe_fan_to_number)
+
+# %%
+have_seen_star_wars.drop('expanded_universe_fan', axis=1, inplace=True)
+
+# %%
+have_seen_star_wars['expanded_universe_fan_number'].unique()
+
+# %%
+have_seen_star_wars
+
+# %%
+# familiar_expanded_universe column
+def convert_familiar_expanded_to_number(answer):
+    if answer == 'Yes':
+        return 2
+    elif answer == 'No':
+        return 1
+    else:
+        return 0
+
+# %%
+have_seen_star_wars['familiar_expanded_universe_number'] = have_seen_star_wars['familiar_expanded_universe'].apply(convert_familiar_expanded_to_number)
+
+# %%
+have_seen_star_wars.drop('familiar_expanded_universe', axis=1, inplace=True)
+
+# %%
+have_seen_star_wars['familiar_expanded_universe_number'].unique()
+
+# %%
+have_seen_star_wars
+
+# %%
+# star_wars_fan column
+def convert_star_wars_fan_to_number(fan):
+    if fan == 'Yes':
+        return 2
+    elif fan == 'No':
+        return 1
+    else:
+        return 0
+
+# %%
+have_seen_star_wars['star_wars_fan_number'] = have_seen_star_wars['star_wars_fan'].apply(convert_star_wars_fan_to_number)
+
+# %%
+have_seen_star_wars.drop('star_wars_fan', axis=1, inplace=True)
+
+# %%
+have_seen_star_wars['star_wars_fan_number'].unique()
+
+# %%
+have_seen_star_wars
+
+# %%
+# seen_star_wars column
+def convert_seen_star_wars_to_number(seen):
+    if seen == 'Yes':
+        return 2
+    elif seen == 'No':
+        return 1
+    else:
+        return 0
+
+# %%
+have_seen_star_wars['seen_star_wars_number'] = have_seen_star_wars['seen_star_wars'].apply(convert_seen_star_wars_to_number)
+
+# %%
+have_seen_star_wars.drop('seen_star_wars', axis=1, inplace=True)
+
+# %%
+have_seen_star_wars['star_wars_fan_number'].unique()
+
+# %%
+have_seen_star_wars
+
+#%%
 ####################################################################################
 # STEP 3: CHART 1
 ####################################################################################
 # People who have seen all six movies
-df = df[df['seen_any'] != 'No']
-df = df.dropna(subset=['seen_1', 'seen_2', 'seen_3', 'seen_4', 'seen_5', 'seen_6'])
+df1 = df[df['seen_any'] != 'No']
+df1 = df1.dropna(subset=['seen_1', 'seen_2', 'seen_3', 'seen_4', 'seen_5', 'seen_6'])
 
 
 #%%
 # Figuring out the counts and percentages
-fav1=df['fav_1'].value_counts()['1']/471
-fav2=df['fav_2'].value_counts()['1']/471
-fav3=df['fav_3'].value_counts()['1']/471
-fav4=df['fav_4'].value_counts()['1']/471
-fav5=df['fav_5'].value_counts()['1']/471
-fav6=df['fav_6'].value_counts()['1']/471
+fav1=df1['fav_1'].value_counts()['1']/471
+fav2=df1['fav_2'].value_counts()['1']/471
+fav3=df1['fav_3'].value_counts()['1']/471
+fav4=df1['fav_4'].value_counts()['1']/471
+fav5=df1['fav_5'].value_counts()['1']/471
+fav6=df1['fav_6'].value_counts()['1']/471
 
 #%%
 
-# Creating the first chart
+# Creating the first chseen
 df1 = pd.DataFrame({
     'votes': [fav1,fav2,fav3,fav4,fav5,fav6],
     'movies': ['The Phantom Menace', 'Attack of the Clones', 'Revenge of the Sith', 
@@ -125,14 +363,54 @@ configured_chart = layered_chart.configure_axis(
 
 configured_chart
 
+#%%
 ####################################################################################
 # STEP 3: CHART 2
 ####################################################################################
+# People who have seen all six movies
+df2 = df.dropna(subset=['seen_1', 'seen_2', 'seen_3', 'seen_4', 'seen_5', 'seen_6'], how = "all")
+pd.get_dummies(df2.filter(['seen_1', 'seen_2', 'seen_3', 'seen_4', 'seen_5', 'seen_6'])).mean()
 
 
+#%%
+# Creating the first chseen
+df2c = pd.DataFrame({
+    'votes': [0.804988,0.683832,0.658683,0.726946,0.907784,0.883832],
+    'movies': ['The Phantom Menace', 'Attack of the Clones', 'Revenge of the Sith', 
+                     'A New Hope', 'The Empire Strikes Back', 'Return of the Jedi'],
+})
 
+df2c
+#%%
+# Define your base chart
 
+base = alt.Chart(df2c,
+        title=alt.Title(
+       "Which 'Star Wars' Movies Have You Seen",
+       subtitle="Of 835 respondents who have seen any film",
+       anchor='start'
+   )).encode(
+    alt.X('votes', title='Votes', axis=None),
+    alt.Y("movies", sort=df1['movies'].tolist(), axis=alt.Axis(title=None)),
+    text=alt.Text('votes', format='.0%')
+)
 
+# Define your bar and text charts
+bar_chart = base.mark_bar(color='#008ED4')
+text_chart = base.mark_text(align='left', dx=2)
+
+# Layer your charts
+layered_chart = bar_chart + text_chart
+
+# Set the configuration on the layered chart
+configured_chart = layered_chart.configure_axis(
+    grid=False
+).configure(background='#F1F0F1'
+).configure_view(
+    stroke=None
+)
+
+configured_chart
 
 
 
