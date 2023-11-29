@@ -6,6 +6,9 @@ import pandas as pd
 import altair as alt
 import numpy as np
 alt.data_transformers.enable("vegafusion")
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import metrics
 
 url = 'https://github.com/fivethirtyeight/data/raw/master/star-wars-survey/StarWars.csv'
 
@@ -66,18 +69,17 @@ df.head()
 
 #%%
 ####################################################################################
-# STEP 2
+# STEP 2A
 ####################################################################################
-"""QUESTION 2 a)"""
-have_seen_star_wars = df[df['seen_any'] == 'Yes']
-have_seen_star_wars
+
+seen_sw = df[df['seen_any'] == 'Yes']
+seen_sw.head()
 
 # %%
-have_seen_star_wars
-
-# %%
-"""QUESTION 2 b)"""
-have_seen_star_wars['age'].unique()
+####################################################################################
+# STEP 2B
+####################################################################################
+seen_sw['age'].unique()
 
 def convert_age_range_to_number(age_range):
     if age_range == '18-29':
@@ -91,49 +93,41 @@ def convert_age_range_to_number(age_range):
     else:
         return 0
 # %%
-have_seen_star_wars['age_number'] = have_seen_star_wars['age'].apply(convert_age_range_to_number)
+seen_sw['age_number'] = seen_sw['age'].apply(convert_age_range_to_number)
+seen_sw.drop('age', axis=1, inplace=True)
+seen_sw.head()
+#%%
+df['latest_degree'].unique()
 
-# %%
-have_seen_star_wars.drop('age', axis=1, inplace=True)
-
-# %%
-have_seen_star_wars
-
-# %%
-data['education'].unique()
-# %%
-"""QUESTION 2 c)"""
-def convert_education_to_number(education):
-    if education == 'High school degree':
+####################################################################################
+# STEP 2C
+####################################################################################
+def convert_latest_degree_to_number(latest_degree):
+    if latest_degree == 'High school degree':
         return 1
-    elif education == 'Bachelor degree':
+    elif latest_degree == 'Bachelor degree':
         return 2
-    elif education == 'Some college or Associate degree':
+    elif latest_degree == 'Some college or Associate degree':
         return 3
-    elif education == 'Graduate degree':
+    elif latest_degree == 'Graduate degree':
         return 4
-    elif education == 'Less than high school degree':
+    elif latest_degree == 'Less than high school degree':
         return 5
     else:
         return 0
 # %%
-have_seen_star_wars['education_number'] = have_seen_star_wars['education'].apply(convert_education_to_number)
+seen_sw['latest_degree_number'] = seen_sw['latest_degree'].apply(convert_latest_degree_to_number)
+seen_sw.drop('latest_degree', axis=1, inplace=True)
+seen_sw.head()
 
 # %%
-have_seen_star_wars.drop('education', axis=1, inplace=True)
-
+seen_sw['age_number'].unique()
+seen_sw['latest_degree_number'].unique()
+seen_sw['income'].unique()
 # %%
-have_seen_star_wars
-
-# %%
-have_seen_star_wars['age_number'].unique()
-
-# %%
-have_seen_star_wars['education_number'].unique()
-
-# %%
-"""QUESTION 2 d)"""
-have_seen_star_wars['household_income'].unique()
+####################################################################################
+# STEP 2D
+####################################################################################
 
 # %%
 def convert_income_to_number(income):
@@ -151,35 +145,33 @@ def convert_income_to_number(income):
         return 0
 
 # %%
-have_seen_star_wars['household_income_number'] = have_seen_star_wars['household_income'].apply(convert_income_to_number)
+seen_sw['income_number'] = seen_sw['income'].apply(convert_income_to_number)
+seen_sw.drop('income', axis=1, inplace=True)
+seen_sw.head()
 
 # %%
-have_seen_star_wars.drop('household_income', axis=1, inplace=True)
+seen_sw['income_number'].unique()
 
 # %%
-have_seen_star_wars
-
-# %%
-have_seen_star_wars['household_income_number'].unique()
-
-# %%
-"""QUESTION 2 e)"""
+####################################################################################
+# STEP 2E
+####################################################################################
 # If the income is 50k or greater then I will consider it as high. Otherwise, low. I am
 # representing that in my target as 1s and 0s, respectively.
 
 def create_income_target(income_number):
     return 1 if income_number >= 3 else 0
 
-have_seen_star_wars['y'] = have_seen_star_wars['household_income_number'].apply(create_income_target)
+seen_sw['y'] = seen_sw['income_number'].apply(create_income_target)
+seen_sw.head()
 
 # %%
-have_seen_star_wars
+seen_sw['y'].unique()
 
 # %%
-have_seen_star_wars['y'].unique()
-
-# %%
-"""QUESTION 2 f)"""
+####################################################################################
+# STEP 2F
+####################################################################################
 # gender column
 def convert_gender_to_number(gender):
     if gender == 'Female':
@@ -190,13 +182,10 @@ def convert_gender_to_number(gender):
         return 0
 
 # %%
-have_seen_star_wars['gender_number'] = have_seen_star_wars['gender'].apply(convert_gender_to_number)
+seen_sw['gender_number'] = seen_sw['gender'].apply(convert_gender_to_number)
+seen_sw.drop('gender', axis=1, inplace=True)
+seen_sw['gender_number'].unique()
 
-# %%
-have_seen_star_wars.drop('gender', axis=1, inplace=True)
-
-# %%
-have_seen_star_wars['gender_number'].unique()
 # %%
 # star_trek_fan column
 def convert_star_trek_fan_to_number(fan):
@@ -208,17 +197,13 @@ def convert_star_trek_fan_to_number(fan):
         return 0
 
 # %%
-have_seen_star_wars['star_trek_fan_number'] = have_seen_star_wars['star_trek_fan'].apply(convert_star_trek_fan_to_number)
+seen_sw['is_trekie_number'] = seen_sw['is_trekie'].apply(convert_star_trek_fan_to_number)
+seen_sw.drop('is_trekie', axis=1, inplace=True)
+seen_sw['is_trekie_number'].unique()
 
 # %%
-have_seen_star_wars.drop('star_trek_fan', axis=1, inplace=True)
-
-# %%
-have_seen_star_wars['star_trek_fan_number'].unique()
-
-# %%
-# expanded_universe_fan column
-def convert_expanded_universe_fan_to_number(fan):
+# eu_fan column
+def convert_eu_fan_to_number(fan):
     if fan == 'Yes':
         return 2
     elif fan == 'No':
@@ -227,20 +212,14 @@ def convert_expanded_universe_fan_to_number(fan):
         return 0
 
 # %%
-have_seen_star_wars['expanded_universe_fan_number'] = have_seen_star_wars['expanded_universe_fan'].apply(convert_expanded_universe_fan_to_number)
+seen_sw['eu_fan_number'] = seen_sw['eu_fan'].apply(convert_eu_fan_to_number)
+seen_sw.drop('eu_fan', axis=1, inplace=True)
+seen_sw['eu_fan_number'].unique()
+seen_sw.head()
 
 # %%
-have_seen_star_wars.drop('expanded_universe_fan', axis=1, inplace=True)
-
-# %%
-have_seen_star_wars['expanded_universe_fan_number'].unique()
-
-# %%
-have_seen_star_wars
-
-# %%
-# familiar_expanded_universe column
-def convert_familiar_expanded_to_number(answer):
+# know_eu column
+def convert_know_eu_to_number(answer):
     if answer == 'Yes':
         return 2
     elif answer == 'No':
@@ -249,16 +228,16 @@ def convert_familiar_expanded_to_number(answer):
         return 0
 
 # %%
-have_seen_star_wars['familiar_expanded_universe_number'] = have_seen_star_wars['familiar_expanded_universe'].apply(convert_familiar_expanded_to_number)
+seen_sw['know_eu_number'] = seen_sw['know_eu'].apply(convert_know_eu_to_number)
 
 # %%
-have_seen_star_wars.drop('familiar_expanded_universe', axis=1, inplace=True)
+seen_sw.drop('know_eu', axis=1, inplace=True)
+seen_sw.head()
+# %%
+seen_sw['know_eu_number'].unique()
 
 # %%
-have_seen_star_wars['familiar_expanded_universe_number'].unique()
-
-# %%
-have_seen_star_wars
+seen_sw.head()
 
 # %%
 # star_wars_fan column
@@ -271,16 +250,10 @@ def convert_star_wars_fan_to_number(fan):
         return 0
 
 # %%
-have_seen_star_wars['star_wars_fan_number'] = have_seen_star_wars['star_wars_fan'].apply(convert_star_wars_fan_to_number)
-
-# %%
-have_seen_star_wars.drop('star_wars_fan', axis=1, inplace=True)
-
-# %%
-have_seen_star_wars['star_wars_fan_number'].unique()
-
-# %%
-have_seen_star_wars
+seen_sw['is_fan_number'] = seen_sw['is_fan'].apply(convert_star_wars_fan_to_number)
+seen_sw.drop('is_fan', axis=1, inplace=True)
+seen_sw['is_fan_number'].unique()
+seen_sw.head()
 
 # %%
 # seen_star_wars column
@@ -293,16 +266,11 @@ def convert_seen_star_wars_to_number(seen):
         return 0
 
 # %%
-have_seen_star_wars['seen_star_wars_number'] = have_seen_star_wars['seen_star_wars'].apply(convert_seen_star_wars_to_number)
+seen_sw['seen_any_number'] = seen_sw['seen_any'].apply(convert_seen_star_wars_to_number)
+seen_sw.drop('seen_any', axis=1, inplace=True)
+seen_sw['seen_any_number'].unique()
 
-# %%
-have_seen_star_wars.drop('seen_star_wars', axis=1, inplace=True)
-
-# %%
-have_seen_star_wars['star_wars_fan_number'].unique()
-
-# %%
-have_seen_star_wars
+seen_sw.head()
 
 #%%
 ####################################################################################
@@ -413,42 +381,41 @@ configured_chart = layered_chart.configure_axis(
 configured_chart
 
 
+#%%
+####################################################################################
+# STEP 4: MACHINE LEARNING
+####################################################################################
+"""QUESTION 4"""
 
+seen_sw.columns
+# %%
+x = seen_sw.filter[['seen_any', 'seen_1', 'seen_2', 'seen_3', 'seen_4', 'seen_5',
+                         'seen_6', 'rank_1', 'rank_2', 'rank_3', 'rank_4', 'rank_5', 'rank_6',
+                         'han_solo', 'luke_skywalker', 'leia_organa', 'anakin_skywalker',
+                         'obi_wan', 'emperor_palpatine', 'darth_vader', 'lando_calrissian',
+                         'boba_fett', 'c3p0', 'r2d2', 'jar_jar', 'padme_admidala', 'yoda',
+                         'shot_first', 'region_census_location', 'age_number',
+                         'education_number', 'household_income_number', 'gender_number',
+                         'star_trek_fan_number', 'expanded_universe_fan_number',
+                         'familiar_expanded_universe_number', 'star_wars_fan_number',
+                         'seen_star_wars_number']]
 
+y = seen_sw.household_income_number
 
+#%%
+X_train, X_test, y_train, y_test = train_test_split(x, y, random_state=166,test_size=0.2)
+
+# create the model
+classifier = RandomForestClassifier()
+
+classifier.fit(X_train, y_train)
+
+y_predicitons = classifier.predict(X_test)
+
+metrics.accuracy_score(y_test, y_predicitons)
 
 
 #%%
-# seen_it = clean_data['seen_any'].value_counts()['Yes']
-# havent_seen = clean_data['seen_any'].value_counts()['No']
+print(metrics.classification_report(y_test, y_predicitons))
 
-# #%%
-# total_counts= seen_it+havent_seen
-# total_counts
-
-# #%%
-# percent_seen_it=seen_it/total_counts
-# percent_seen_it
-
-# ###########################################################################
-# #%%
-
-# m_seen_it = male['seen_any'].value_counts()['Yes']
-# m_havent_seen = male['seen_any'].value_counts()['No']
-# m_total_counts= m_seen_it+m_havent_seen
-# m_total_counts
-
-# #%%
-# m_percent_seen_it=m_seen_it/m_total_counts
-# m_percent_seen_it
-
-
-
-
-
-
-
-# #%%
-# total = clean_data['seen_any'].value_counts()
-# total
 
