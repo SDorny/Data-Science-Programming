@@ -93,3 +93,4 @@ alt.Chart(source).mark_circle(size=60).encode(
 #####################################
 print(metrics.classification_report(y_test, y_predicitons))
 
+

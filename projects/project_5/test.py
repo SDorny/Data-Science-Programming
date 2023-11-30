@@ -6,9 +6,15 @@ import pandas as pd
 import altair as alt
 import numpy as np
 alt.data_transformers.enable("vegafusion")
+
 from sklearn.model_selection import train_test_split
+from sklearn.impute import SimpleImputer
+from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn import metrics
+alt.data_transformers.disable_max_rows()
 
 url = 'https://github.com/fivethirtyeight/data/raw/master/star-wars-survey/StarWars.csv'
 
@@ -30,7 +36,7 @@ clean_data= data.rename(columns={'Have you seen any of the 6 films in the Star W
                                  'Unnamed: 6':'seen_4',
                                  'Unnamed: 7':'seen_5',
                                  'Unnamed: 8':'seen_6',
-                                 'Please rank the Star Wars films in order of preference with 1 being your favorite film in the franchise and 6 being your least favorite film.':'fav_1',
+                                 'Please fav the Star Wars films in order of preference with 1 being your favorite film in the franchise and 6 being your least favorite film.':'fav_1',
                                  'Unnamed: 10':'fav_2',
                                  'Unnamed: 11':'fav_3',
                                  'Unnamed: 12':'fav_4',
@@ -388,34 +394,27 @@ configured_chart
 """QUESTION 4"""
 
 seen_sw.columns
+
 # %%
-x = seen_sw.filter[['seen_any', 'seen_1', 'seen_2', 'seen_3', 'seen_4', 'seen_5',
-                         'seen_6', 'rank_1', 'rank_2', 'rank_3', 'rank_4', 'rank_5', 'rank_6',
-                         'han_solo', 'luke_skywalker', 'leia_organa', 'anakin_skywalker',
-                         'obi_wan', 'emperor_palpatine', 'darth_vader', 'lando_calrissian',
-                         'boba_fett', 'c3p0', 'r2d2', 'jar_jar', 'padme_admidala', 'yoda',
-                         'shot_first', 'region_census_location', 'age_number',
-                         'education_number', 'household_income_number', 'gender_number',
-                         'star_trek_fan_number', 'expanded_universe_fan_number',
-                         'familiar_expanded_universe_number', 'star_wars_fan_number',
-                         'seen_star_wars_number']]
+x = seen_sw[['fav_1', 'fav_2', 'fav_3', 'fav_4', 'fav_5', 'fav_6',
+                         'age_number',
+                         'latest_degree_number', 'gender_number',]]
 
-y = seen_sw.household_income_number
+y = seen_sw[["y"]]
 
-#%%
-X_train, X_test, y_train, y_test = train_test_split(x, y, random_state=166,test_size=0.2)
+# %%
+imputer = SimpleImputer(strategy='mean')
+x_encoded_imputed = pd.DataFrame(imputer.fit_transform(x), columns=x.columns)
+x_train, x_test, y_train, y_test = train_test_split(x_encoded_imputed, y)
+y_train.head()
 
-# create the model
+
+# %%
 classifier = RandomForestClassifier()
 
-classifier.fit(X_train, y_train)
+classifier.fit(x_train, y_train)
 
-y_predicitons = classifier.predict(X_test)
+y_predicted = classifier.predict(x_test)
 
-metrics.accuracy_score(y_test, y_predicitons)
-
-
-#%%
-print(metrics.classification_report(y_test, y_predicitons))
-
+print("Accuracy:", metrics.accuracy_score(y_test, y_predicted))
 
