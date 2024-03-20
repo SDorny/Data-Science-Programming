@@ -1,0 +1,38 @@
+---
+title: "Final Coding Challenge"
+subtitle: "Course DS 250"
+author: "[STUDENT NAME]"
+format:
+  html:
+    self-contained: true
+    page-layout: full
+    number-sections: false
+    html-math-method: katex
+    code-fold: false
+    code-summary: "Show the code"
+    code-overflow: wrap
+---
+
+## Challenge Summary
+
+_After completing the challenge, describe how you think you did._
+
+## Question 1
+
+```{python}
+#| label: Q1
+#| code-summary: Answer the first question
+# Include and execute your code here
+
+```
+
+## Question 2
+
+```{python}
+#| label: Q2
+#| code-summary: Answer the second question
+# Include and execute your code here
+
+```
+
+*Add more questions as needed.*

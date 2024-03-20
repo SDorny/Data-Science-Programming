@@ -8,6 +8,10 @@ import altair as alt
 alt.data_transformers.enable("vegafusion")
 
 
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import metrics
+
 ##########################################################################
 # Graphs
 # Link: https://altair-viz.github.io/user_guide/customization.html
@@ -65,3 +69,43 @@ data['num_of_delays_late_aircraft'] = data['num_of_delays_late_aircraft']
 # Use dropna to remove rows with missing values
 df_clean = df.dropna()
 
+#########################################################################
+## Build a Classification Model
+##########################################################################
+X_train, X_test, y_train, y_test = train_test_split(x, y, random_state=166,test_size=0.2)
+
+# create the model
+classifier = RandomForestClassifier()
+
+classifier.fit(X_train, y_train)
+
+y_predicitons = classifier.predict(X_test)
+
+metrics.accuracy_score(y_test, y_predicitons)
+
+
+#%%
+#########################################################################
+## Justify Your Classification Model 
+##########################################################################
+
+importance = classifier.feature_importances_
+# summarize feature importance
+for i,v in enumerate(importance):
+ print('Feature: %0d, Score: %.5f' % (i,v))
+
+#%%
+
+source = sample_chart
+
+alt.Chart(source).mark_circle(size=60).encode(
+    alt.X('yrbuilt', axis=alt.Axis(format='d')).scale(domain=(1950, 2015)).title('Year Built'),
+    alt.Y('livearea').title('Live Area'),
+    color='before1980:N',
+).interactive()
+
+# %%
+####################################
+## Quality of your classification
+#####################################
+print(metrics.classification_report(y_test, y_predicitons))

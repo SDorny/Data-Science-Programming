@@ -56,7 +56,7 @@ sample_chart = subset_data
 
 ## Identifying Two Variables to Help us Predict: Number of Baths and Number of Stories
 
-_In or to predict something, we have to have something to go off of. One might be able to predict a impending rainstorm based off of stormy clouds on the horizon. For our case, we take a look at our own "storm clouds", otherwise known as features, to see what will help us predict if a house is before or after 1980._ 
+_In order to predict something, we have to have something to go off of. One might be able to predict a impending rainstorm based off of stormy clouds on the horizon. For our case, we take a look at our own "storm clouds", otherwise known as features, to see what will help us predict if a house is before or after 1980._ 
 
 ```{python}
 sample_chart["before1980"].replace({0:"No",1:"Yes"}, inplace=True)
@@ -111,7 +111,7 @@ metrics.accuracy_score(y_test, y_predicitons)
 
 ## Not all Features are Created Equal
 
-_Some features are not as helpful in our predictions as others are. This can create noise in our model and reduce accuracy when given new data. Thankfully, we are able to asses how useful features are based on how helpful they are at predicting a variable through "Feature Importance". Above, we identified "Number of Baths" and "Number of Stories" as features that would be very important, but it appears that there is far lesscorrelation than others. The most important feature we have identified is the Live Area of the house. That has significantly increased after the year 1980!_
+_Some features are not as helpful in our predictions as others are. This can create noise in our model and reduce accuracy when given new data. Thankfully, we are able to asses how useful features are based on how helpful they are at predicting a variable through "Feature Importance". Above, we identified "Number of Baths" and "Number of Stories" as features that would be very important, but it appears that there is far less correlation than others. The most important feature we have identified is the Live Area of the house. That has significantly increased after the year 1980!_
 
 ```{python}
 importance = classifier.feature_importances_
@@ -183,6 +183,7 @@ alt.Chart(source).mark_circle(size=60).encode(
 
 #########################################################################
 ## Build a Classification Model
+##########################################################################
 
 x = ml_dat.filter(['livearea', 'finbsmnt', 'basement', 'nocars', 
                    'numbdrm', 'numbaths', 'gartype_Att/Det', 
